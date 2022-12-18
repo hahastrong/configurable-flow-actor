@@ -1,0 +1,34 @@
+{
+  "start": {
+    "id": "start",
+    "type": "start",
+    "next": "getHTTPRSP"
+  },
+  "getHTTPRSP": {
+    "id": "getHTTPRSP",
+    "type": "task",
+    "next": "databuilder",
+    "task": {
+      "id": "getHTTPRSP",
+      "task_type": "HttpRequest",
+      "method": "GET",
+      "path": "http://ip-api.com/json/138.199.21.138?lang=zh-CN"
+    }
+  },
+  "databuilder": {
+    "id": "databuilder",
+    "type": "task",
+    "next": "end",
+    "task": {
+      "id": "databuilder",
+      "task_type": "DataBuilder",
+      "method": "GET",
+      "response": {
+        ".": {
+          "data": "__getHTTPRSP:RSP__",
+          "action": "expr"
+        }
+      }
+    }
+  }
+}
