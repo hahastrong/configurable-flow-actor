@@ -12,7 +12,7 @@
       "id": "getHTTPRSP",
       "task_type": "HttpRequest",
       "method": "GET",
-      "path": "http://ip-api.com/json/138.199.21.138?lang=zh-CN"
+      "path": "http://www.weather.com.cn/data/cityinfo/101190408.html"
     }
   },
   "databuilder": {

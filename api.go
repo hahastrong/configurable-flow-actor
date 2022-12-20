@@ -17,7 +17,7 @@ func CFARun(lg *log.Logger, flowName string, request string) ([]byte, error) {
 		return nil, err
 	}
 
-	var testFlow string = `{"start":{"id":"start","type":"start","next":"getHTTPRSP"},"getHTTPRSP":{"id":"getHTTPRSP","type":"task","next":"databuilder","task":{"id":"getHTTPRSP","task_type":"HttpRequest","method":"GET","path":"http://ip-api.com/json/138.199.21.138?lang=zh-CN"}},"databuilder":{"id":"databuilder","type":"task","next":"end","task":{"id":"databuilder","task_type":"DataBuilder","method":"GET","response":{".":{"data":"__getHTTPRSP:RSP__","action":"expr"}}}}}`
+	testFlow := `{"start":{"id":"start","type":"start","next":"getHTTPRSP"},"getHTTPRSP":{"id":"getHTTPRSP","type":"task","next":"databuilder","task":{"id":"getHTTPRSP","task_type":"HttpRequest","method":"GET","path":"http://www.weather.com.cn/data/sk/101210101.html"}},"databuilder":{"id":"databuilder","type":"task","next":"end","task":{"id":"databuilder","task_type":"DataBuilder","method":"GET","response":{".":{"data":"__getHTTPRSP:RSP__","action":"expr"}}}}}`
 	var flow Flow
 	err := json.Unmarshal([]byte(testFlow), &flow)
 	if err != nil {

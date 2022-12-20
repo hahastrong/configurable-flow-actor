@@ -2,6 +2,7 @@ package context
 
 import (
 	"errors"
+	"fmt"
 	"github.com/valyala/fastjson"
 	"log"
 	"strings"
@@ -99,19 +100,14 @@ func (c *Context) SetValue(dst string, value *fastjson.Value) error {
 	return nil
 }
 
-func (c *Context) SetResponse(v *fastjson.Value) {
-	c.response = v
+func (c *Context) SetResponse(v []*fastjson.Value) {
+	if len(v) == 0 {
+		return
+	}
+	c.response = v[0]
 }
 
-func (c *Context) GetValue(source string) (*fastjson.Value, error) {
-	if IsTaskTsp(source) {
-		id := getTaskId(source)
-		v := c.taskResult[id].response
-		// 补充 expr 表达式解析，
-		return getValue(v, "")
-	}
-	return nil, errors.New("failed to get value")
-}
+
 
 func getTaskId(source string) string {
 	idList := strings.Split(source, "__")
@@ -119,6 +115,14 @@ func getTaskId(source string) string {
 		return ""
 	}
 	return strings.Replace(idList[1], ":RSP", "", 1)
+}
+
+func (c *Context) getActionResponse(id string) (*fastjson.Value, error) {
+	action, ok := c.taskResult[id]
+	if !ok {
+		return nil, errors.New(fmt.Sprintf("there is not exist actionResult, id: %s", id))
+	}
+	return action.response, nil
 }
 
 func getValue(v *fastjson.Value, dst string) (*fastjson.Value, error) {

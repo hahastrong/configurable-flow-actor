@@ -29,15 +29,14 @@ type RunNode struct {
 	flow Flow
 }
 
-func (rn *RunNode) getDefault(ctx *context.Context) (*RunNode, error) {
-	defaultId := rn.n.Default
-	for k, _ := range rn.flow {
+func (f *Flow) getDefault(ctx *context.Context, defaultId string) (*RunNode, error) {
+
+	for k, _ := range *f {
 		if k == defaultId {
 			ctx.NewTaskResult(k)
 			return &RunNode{
-				n: rn.flow[k],
-				flow: rn.flow,
-				tp: NewTask(rn.flow[k].Task, rn.flow[k].Task.TaskType),
+				n: (*f)[k],
+				tp: NewTask((*f)[k].Task, (*f)[k].Task.TaskType),
 			}, nil
 
 		}
@@ -45,16 +44,15 @@ func (rn *RunNode) getDefault(ctx *context.Context) (*RunNode, error) {
 	return nil, errors.New("failed to get default node")
 }
 
-func (rn *RunNode) getNext(ctx *context.Context) (*RunNode, error) {
-	defaultId := rn.n.Next
-	for k, _ := range rn.flow {
-		if k == defaultId {
+func (f *Flow) getNext(ctx *context.Context, next string) (*RunNode, error) {
+
+	for k, _ := range *f {
+		if k == next {
 
 			ctx.NewTaskResult(k)
 			return &RunNode{
-				n: rn.flow[k],
-				flow: rn.flow,
-				tp: NewTask(rn.flow[k].Task, rn.flow[k].Task.TaskType),
+				n: (*f)[k],
+				tp: NewTask((*f)[k].Task, (*f)[k].Task.TaskType),
 			}, nil
 
 		}
@@ -76,7 +74,6 @@ func (f Flow) getStart() (*RunNode, error) {
 			return &RunNode{
 				n: f[k],
 				tp: NewTask(f[k].Task, START),
-				flow: f,
 			}, nil
 
 		}
@@ -85,7 +82,7 @@ func (f Flow) getStart() (*RunNode, error) {
 	return nil, errors.New("failed to get start node")
 }
 
-func (f Flow) Run(ctx *context.Context) error {
+func (f *Flow) Run(ctx *context.Context) error {
 	n, err := f.getStart()
 	if err != nil {
 		return err
@@ -103,9 +100,9 @@ func (f Flow) Run(ctx *context.Context) error {
 		}
 
 		if rv {
-			n, _ = n.getNext(ctx)
+			n, _ = f.getNext(ctx, n.n.Next)
 		} else {
-			n, _ = n.getDefault(ctx)
+			n, _ = f.getDefault(ctx, n.n.Default)
 		}
 	}
 

@@ -1,9 +1,11 @@
 package configurable_flow_actor
 
 import (
+	"fmt"
 	"github.com/configurable-flow-actor/context"
 	"io/ioutil"
 	"net/http"
+	"time"
 )
 
 type Task interface {
@@ -58,6 +60,10 @@ type End struct {
 }
 
 func (t *HttpRequest) DoTask(ctx *context.Context) error {
+	start := time.Now().UnixMilli()
+	defer func() {
+		fmt.Println(time.Now().UnixMilli() - start)
+	}()
 	if t.tp.Method == "GET" {
 		// 需要自定义请求头
 		// 添加header
