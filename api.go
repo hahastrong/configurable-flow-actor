@@ -3,6 +3,7 @@ package configurable_flow_actor
 import (
 	"encoding/json"
 	"github.com/configurable-flow-actor/context"
+	"io/ioutil"
 	"log"
 	"time"
 )
@@ -17,9 +18,14 @@ func CFARun(lg *log.Logger, flowName string, request string) ([]byte, error) {
 		return nil, err
 	}
 
-	testFlow := `{"start":{"id":"start","type":"start","next":"getHTTPRSP"},"getHTTPRSP":{"id":"getHTTPRSP","type":"task","next":"databuilder","task":{"id":"getHTTPRSP","task_type":"HttpRequest","method":"GET","path":"http://www.weather.com.cn/data/sk/101210101.html"}},"databuilder":{"id":"databuilder","type":"task","next":"end","task":{"id":"databuilder","task_type":"DataBuilder","method":"GET","response":{".":{"data":"__getHTTPRSP:RSP__","action":"expr"}}}}}`
+	//testFlow := `{"start":{"id":"start","type":"start","next":"getHTTPRSP"},"getHTTPRSP":{"id":"getHTTPRSP","type":"task","next":"databuilder","task":{"id":"getHTTPRSP","task_type":"HttpRequest","method":"GET","path":"http://www.weather.com.cn/data/sk/101210101.html"}},"databuilder":{"id":"databuilder","type":"task","next":"end","task":{"id":"databuilder","task_type":"DataBuilder","method":"GET","response":{".":{"data":"__getHTTPRSP:RSP__","action":"expr"}}}}}`
+	floeString, err := ioutil.ReadFile("./flow-json/test.json")
+	if err != nil {
+		return nil, err
+	}
+
 	var flow Flow
-	err := json.Unmarshal([]byte(testFlow), &flow)
+	err = json.Unmarshal(floeString, &flow)
 	if err != nil {
 		return nil, err
 	}

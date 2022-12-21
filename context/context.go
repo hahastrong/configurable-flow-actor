@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/valyala/fastjson"
 	"log"
+	"net/http"
 	"strings"
 )
 
@@ -23,8 +24,8 @@ type Context struct {
 type TaskResult struct {
 	request *fastjson.Value
 	response *fastjson.Value
-	headers map[string]string // 这个字段还需要后续在修改下
-	responseByte []byte
+	headers http.Header // 这个字段还需要后续在修改下
+	responseByte []byte // binary, text
 }
 
 func (c *Context) Init(request string) error {
@@ -47,7 +48,7 @@ func (c *Context) NewTaskResult(id string) {
 	c.taskResult[id] = &TaskResult{
 		response: c.A.NewObject(),
 		request: c.A.NewObject(),
-		headers: make(map[string]string),
+		headers: make(http.Header),
 	}
 }
 
@@ -63,11 +64,10 @@ func (c *Context) SetRsp(id string, rsp []byte) error {
 	return nil
 }
 
-func (c *Context) SetHeaders(id string, headers map[string]string) error {
+func (c *Context) SetHeaders(id string, headers http.Header) error {
 	if _, ok := c.taskResult[id]; !ok {
 		return errors.New("failed to get taskResult value")
 	}
-	c.taskResult[id].headers = make(map[string]string)
 	c.taskResult[id].headers = headers
 	return nil
 }
@@ -89,22 +89,33 @@ func IsTaskTsp(source string) bool {
 	return strings.Contains(source, ":RSP__")
 }
 
-func (c *Context) SetValue(dst string, value *fastjson.Value) error {
-	//if IsTaskTsp(source) {
-	//	id := getTaskId(source)
-	//	v := c.taskResult[id].response
-	//	// 补充 expr 表达式解析，
-	//	return getValue(v, "")
-	//}
-	//return nil, errors.New("failed to get value")
-	return nil
-}
-
 func (c *Context) SetResponse(v []*fastjson.Value) {
 	if len(v) == 0 {
 		return
 	}
 	c.response = v[0]
+}
+
+func (c *Context) MarshalActionRequest(id string) string {
+	actionResult, ok := c.taskResult[id]
+	if !ok {
+		// 待补充
+		return ""
+	}
+	var req []byte
+	req = actionResult.request.MarshalTo(req)
+	return string(req)
+}
+
+func (c *Context) MarshalActionResponse(id string) string {
+	actionResult, ok := c.taskResult[id]
+	if !ok {
+		// 待补充
+		return ""
+	}
+	var req []byte
+	req = actionResult.response.MarshalTo(req)
+	return string(req)
 }
 
 
@@ -123,6 +134,14 @@ func (c *Context) getActionResponse(id string) (*fastjson.Value, error) {
 		return nil, errors.New(fmt.Sprintf("there is not exist actionResult, id: %s", id))
 	}
 	return action.response, nil
+}
+
+func (c *Context) getActionRequest(id string) (*fastjson.Value, error) {
+	action, ok := c.taskResult[id]
+	if !ok {
+		return nil, errors.New(fmt.Sprintf("there is not exist actionResult, id: %s", id))
+	}
+	return action.request, nil
 }
 
 func getValue(v *fastjson.Value, dst string) (*fastjson.Value, error) {

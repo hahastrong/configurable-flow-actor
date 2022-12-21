@@ -12,6 +12,7 @@
       "id": "getHTTPRSP",
       "task_type": "HttpRequest",
       "method": "GET",
+      "content_type": "json",
       "path": "http://www.weather.com.cn/data/cityinfo/101190408.html"
     }
   },
@@ -24,8 +25,8 @@
       "task_type": "DataBuilder",
       "method": "GET",
       "response": {
-        ".": {
-          "data": "__getHTTPRSP:RSP__",
+        ".weatherinfo": {
+          "data": "__getHTTPRSP:RSP__.weatherinfo",
           "action": "expr"
         }
       }

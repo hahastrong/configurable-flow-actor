@@ -13,12 +13,13 @@ type Task interface {
 }
 
 type TaskParam struct {
-	ID       string            `json:"id"`
-	TaskType string            `json:"task_type"`
-	Path     string            `json:"path"`
-	Method   string            `json:"method"`
-	Request  map[string]*ParamNode `json:"request"` // 后续在更改为可以替换的
-	Response map[string]*ParamNode `json:"response"`
+	ID          string                `json:"id"`
+	TaskType    string                `json:"task_type"`
+	Path        string                `json:"path"`
+	Method      string                `json:"method"`
+	ContentType string                `json:"content_type"`
+	Request     map[string]*ParamNode `json:"request"` // 后续在更改为可以替换的
+	Response    map[string]*ParamNode `json:"response"`
 }
 
 type ParamNode struct {
@@ -32,8 +33,10 @@ type ParamNode struct {
 func (p *ParamNode) exec(ctx *context.Context, k string) error {
 	if p.Action == "expr" {
 		v, _ := ctx.GetValue(p.Data)
-		// 直接复制给 respose
-		ctx.SetResponse(v)
+		err := ctx.SetValue(k, v)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -81,9 +84,16 @@ func (t *HttpRequest) DoTask(ctx *context.Context) error {
 		rspBody, err := ioutil.ReadAll(rsp.Body)
 		_ = rsp.Body.Close()
 
-		err = ctx.SetRsp(t.tp.ID, rspBody)
+		err = ctx.SetHeaders(t.tp.ID, rsp.Header)
 		if err != nil {
 			return err
+		}
+
+		if t.tp.ContentType == "json" {
+			err = ctx.SetRsp(t.tp.ID, rspBody)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
@@ -91,7 +101,8 @@ func (t *HttpRequest) DoTask(ctx *context.Context) error {
 
 func (t *DataBuilder) DoTask(ctx *context.Context) error {
 	for k, v := range t.tp.Response {
-		err := v.exec(ctx, k)
+		dst := fmt.Sprintf("__RESPONSE__%s", k)
+		err := v.exec(ctx, dst)
 		if err != nil {
 			return err
 		}

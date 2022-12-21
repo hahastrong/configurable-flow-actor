@@ -9,7 +9,7 @@ import (
 
 type Expr struct {
 	expr string
-	Type int // localvar
+	Type int // Object Array
 	Token string
 	next *Expr
 	head *Expr
@@ -55,8 +55,44 @@ flag:
 	return pva, err
 }
 
+func (e *Expr) setValue(A *fastjson.Arena, dst *fastjson.Value, v []*fastjson.Value) error {
+	p := e.next
+
+	//pva := []*fastjson.Value{dst}
+
+	// just consider the object
+	for p != nil {
+		if p.Type == ExprTypeObject {
+			if p.next != nil {
+				if dst.Exists(p.Token) {
+					dst = dst.Get(p.Token)
+				} else {
+					tmpV := A.NewObject()
+					dst.Set(p.Token, tmpV)
+					dst = tmpV
+				}
+			} else {
+				dst.Set(p.Token, v[0])
+				break
+			}
+		} else {
+			return errors.New(fmt.Sprintf("invalid type, expr: %v",p.head.expr))
+		}
+	}
+
+	return nil
+}
+
 func (e *Expr) IsTaskTsp() bool {
 	return strings.Contains(e.Token, ":RSP__")
+}
+
+func (e *Expr) IsActionRequest() bool {
+	return strings.Contains(e.Token, ":REQ__")
+}
+
+func (e *Expr) IsResponse() bool {
+	return strings.Contains(e.Token, "__RESPONSE__")
 }
 
 func ExpressionParse(expr string) (*Expr, error) {
@@ -132,4 +168,32 @@ func (c *Context) GetValue(source string) ([]*fastjson.Value, error) {
 		return nil, errors.New("failed to get value")
 	}
 	return value, nil
+}
+
+func (c *Context) SetValue(dst string, v []*fastjson.Value) error {
+	ee, err := ExpressionParse(dst)
+	if err != nil {
+		return err
+	}
+
+	if ee.IsActionRequest() {
+		id := getTaskId(dst)
+		req, err := c.getActionRequest(id)
+		if err != nil {
+			return err
+		}
+
+		err = ee.setValue(c.A, req, v)
+		if err != nil {
+			return err
+		}
+	} else if ee.IsResponse() {
+			res := c.response
+			err = ee.setValue(c.A, res, v)
+			if err != nil {
+				return err
+			}
+	}
+
+	return nil
 }
