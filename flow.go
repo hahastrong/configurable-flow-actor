@@ -29,8 +29,18 @@ type RunNode struct {
 	flow Flow
 }
 
-func (f *Flow) getDefault(ctx *context.Context, defaultId string) (*RunNode, error) {
+func (n *RunNode) Run(ctx *context.Context) error {
+	if n.tp == nil {
+		return nil
+	}
 
+	ctx.NewTaskResult(n.n.ID)
+
+	err := n.tp.DoTask(ctx)
+	return err
+}
+
+func (f *Flow) getDefault(ctx *context.Context, defaultId string) (*RunNode, error) {
 	for k, _ := range *f {
 		if k == defaultId {
 			ctx.NewTaskResult(k)
@@ -45,9 +55,16 @@ func (f *Flow) getDefault(ctx *context.Context, defaultId string) (*RunNode, err
 }
 
 func (f *Flow) getNext(ctx *context.Context, next string) (*RunNode, error) {
-
+	if next == "" {
+		return nil, nil
+	}
 	for k, _ := range *f {
 		if k == next {
+			if k == END {
+				return &RunNode{
+					n: (*f)[k],
+				}, nil
+			}
 
 			ctx.NewTaskResult(k)
 			return &RunNode{
@@ -95,14 +112,17 @@ func (f *Flow) Run(ctx *context.Context) error {
 			return err
 		}
 
-		if err := n.tp.DoTask(ctx); err != nil {
+		if err := n.Run(ctx); err != nil {
 			return err
 		}
 
 		if rv {
-			n, _ = f.getNext(ctx, n.n.Next)
+			n, err = f.getNext(ctx, n.n.Next)
 		} else {
-			n, _ = f.getDefault(ctx, n.n.Default)
+			n, err = f.getDefault(ctx, n.n.Default)
+		}
+		if err != nil {
+			return err
 		}
 	}
 

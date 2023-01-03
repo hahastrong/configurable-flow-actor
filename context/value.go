@@ -78,6 +78,7 @@ func (e *Expr) setValue(A *fastjson.Arena, dst *fastjson.Value, v []*fastjson.Va
 		} else {
 			return errors.New(fmt.Sprintf("invalid type, expr: %v",p.head.expr))
 		}
+		p = p.next
 	}
 
 	return nil
@@ -85,6 +86,10 @@ func (e *Expr) setValue(A *fastjson.Arena, dst *fastjson.Value, v []*fastjson.Va
 
 func (e *Expr) IsTaskTsp() bool {
 	return strings.Contains(e.Token, ":RSP__")
+}
+
+func (e *Expr) IsRequest() bool {
+	return strings.Contains(e.Token, "__REQUEST__")
 }
 
 func (e *Expr) IsActionRequest() bool {
@@ -164,6 +169,12 @@ func (c *Context) GetValue(source string) ([]*fastjson.Value, error) {
 		}
 		// 补充 expr 表达式解析，
 		value, err = ee.getValue(v)
+	} else if ee.IsRequest() {
+		v := c.GetRequest()
+		value, err = ee.getValue(v)
+		if err != nil {
+			return nil, err
+		}
 	} else {
 		return nil, errors.New("failed to get value")
 	}

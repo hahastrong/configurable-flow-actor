@@ -6,6 +6,7 @@ import (
 	"github.com/valyala/fastjson"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 )
 
@@ -19,6 +20,7 @@ type Context struct {
 
 	// flow process result
 	Exit bool
+	CmdDir string
 }
 
 type TaskResult struct {
@@ -41,7 +43,13 @@ func (c *Context) Init(request string) error {
 
 	c.Exit = true
 
+	c.CmdDir, _ = os.Getwd()
+
 	return nil
+}
+
+func (c *Context) SetCmdDir(dir string) {
+	c.CmdDir = dir
 }
 
 func (c *Context) NewTaskResult(id string) {
@@ -125,7 +133,12 @@ func getTaskId(source string) string {
 	if len(idList) < 3 {
 		return ""
 	}
-	return strings.Replace(idList[1], ":RSP", "", 1)
+	idString := strings.Replace(idList[1], ":RSP", "", 1)
+	return strings.Replace(idString, ":REQ", "", 1)
+}
+
+func (c *Context) GetRequest() *fastjson.Value {
+	return c.request
 }
 
 func (c *Context) getActionResponse(id string) (*fastjson.Value, error) {
