@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/configurable-flow-actor/context"
 	"github.com/valyala/fastjson"
 	"io"
 	"io/ioutil"
@@ -16,7 +15,7 @@ import (
 )
 
 type Task interface {
-	DoTask(ctx *context.Context) error
+	DoTask(ctx *Context) error
 }
 
 type TaskParam struct {
@@ -37,7 +36,7 @@ type ParamNode struct {
 	SourceIdx map[string]string `json:"source_idx"` // to replace source dst item
 }
 
-func (p *ParamNode) exec(ctx *context.Context, k string) error {
+func (p *ParamNode) exec(ctx *Context, k string) error {
 	if p.Action == "expr" {
 		v, _ := ctx.GetValue(p.Data)
 		err := ctx.SetValue(k, v)
@@ -100,7 +99,7 @@ type End struct {
 	tp *TaskParam
 }
 
-func (t *HttpRequest) DoTask(ctx *context.Context) error {
+func (t *HttpRequest) DoTask(ctx *Context) error {
 	for k, v := range t.tp.Request {
 		dst := fmt.Sprintf("__%s:REQ__%s", t.tp.ID, k)
 		err := v.exec(ctx, dst)
@@ -207,7 +206,7 @@ func (t *HttpRequest) DoTask(ctx *context.Context) error {
 	return nil
 }
 
-func (t *DataBuilder) DoTask(ctx *context.Context) error {
+func (t *DataBuilder) DoTask(ctx *Context) error {
 	for k, v := range t.tp.Response {
 		dst := fmt.Sprintf("__RESPONSE__%s", k)
 		err := v.exec(ctx, dst)
@@ -218,7 +217,7 @@ func (t *DataBuilder) DoTask(ctx *context.Context) error {
 	return nil
 }
 
-func (t *YtbDownloader) DoTask(ctx *context.Context) error {
+func (t *YtbDownloader) DoTask(ctx *Context) error {
 	for k, v := range t.tp.Request {
 		dst := fmt.Sprintf("__%s:REQ__%s", t.tp.ID,k)
 		err := v.exec(ctx, dst)
@@ -269,11 +268,11 @@ func (t *YtbDownloader) DoTask(ctx *context.Context) error {
 	return nil
 }
 
-func (t *Start) DoTask(ctx *context.Context) error {
+func (t *Start) DoTask(ctx *Context) error {
 	return nil
 }
 
-func (t *End) DoTask(ctx *context.Context) error {
+func (t *End) DoTask(ctx *Context) error {
 	return nil
 }
 
