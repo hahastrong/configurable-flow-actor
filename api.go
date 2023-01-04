@@ -2,7 +2,7 @@ package configurable_flow_actor
 
 import (
 	"encoding/json"
-	"github.com/configurable-flow-actor/context"
+	"github.com/hahastrong/configurable-flow-actor/context"
 	"io/ioutil"
 	"log"
 	"time"
