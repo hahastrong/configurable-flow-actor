@@ -2,7 +2,6 @@ package configurable_flow_actor
 
 import (
 	"errors"
-	"github.com/configurable-flow-actor/context"
 )
 
 const (
@@ -29,7 +28,7 @@ type RunNode struct {
 	flow Flow
 }
 
-func (n *RunNode) Run(ctx *context.Context) error {
+func (n *RunNode) Run(ctx *Context) error {
 	if n.tp == nil {
 		return nil
 	}
@@ -40,7 +39,7 @@ func (n *RunNode) Run(ctx *context.Context) error {
 	return err
 }
 
-func (f *Flow) getDefault(ctx *context.Context, defaultId string) (*RunNode, error) {
+func (f *Flow) getDefault(ctx *Context, defaultId string) (*RunNode, error) {
 	for k, _ := range *f {
 		if k == defaultId {
 			ctx.NewTaskResult(k)
@@ -54,7 +53,7 @@ func (f *Flow) getDefault(ctx *context.Context, defaultId string) (*RunNode, err
 	return nil, errors.New("failed to get default node")
 }
 
-func (f *Flow) getNext(ctx *context.Context, next string) (*RunNode, error) {
+func (f *Flow) getNext(ctx *Context, next string) (*RunNode, error) {
 	if next == "" {
 		return nil, nil
 	}
@@ -77,7 +76,7 @@ func (f *Flow) getNext(ctx *context.Context, next string) (*RunNode, error) {
 	return nil, errors.New("failed to get next node")
 }
 
-func (rn *RunNode) eval(ctx *context.Context) (bool, error) {
+func (rn *RunNode) eval(ctx *Context) (bool, error) {
 	if rn.n.Type != GATEWAY {
 		return true, nil
 	}
@@ -99,7 +98,7 @@ func (f Flow) getStart() (*RunNode, error) {
 	return nil, errors.New("failed to get start node")
 }
 
-func (f *Flow) Run(ctx *context.Context) error {
+func (f *Flow) Run(ctx *Context) error {
 	n, err := f.getStart()
 	if err != nil {
 		return err
