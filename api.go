@@ -2,14 +2,13 @@ package configurable_flow_actor
 
 import (
 	"encoding/json"
-	"github.com/hahastrong/configurable-flow-actor/context"
 	"io/ioutil"
 	"log"
 	"time"
 )
 
 func CFARun(lg *log.Logger, flowName string, request string) ([]byte, error) {
-	ctx := &context.Context{
+	ctx := &Context{
 		Logger: lg,
 	}
 

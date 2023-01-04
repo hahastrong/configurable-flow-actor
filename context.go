@@ -1,4 +1,4 @@
-package context
+package configurable_flow_actor
 
 import (
 	"errors"

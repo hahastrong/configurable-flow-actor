@@ -1,4 +1,4 @@
-package context
+package configurable_flow_actor
 
 import (
 	"errors"
@@ -107,10 +107,10 @@ func ExpressionParse(expr string) (*Expr, error) {
 	}
 
 	head := &Expr{
-		Type: ExprTypeHead,
-		expr: expr,
+		Type:  ExprTypeHead,
+		expr:  expr,
 		Token: items[0],
-		next: nil,
+		next:  nil,
 	}
 	head.head = head
 
@@ -124,15 +124,15 @@ func ExpressionParse(expr string) (*Expr, error) {
 				expr:  expr,
 				Token: items[i],
 				head:  head,
-				next: nil,
+				next:  nil,
 			}
 		} else if IsArray(expr) {
 			tmp = &Expr{
-				Type: ExprTypeArray,
-				expr: expr,
+				Type:  ExprTypeArray,
+				expr:  expr,
 				Token: items[i],
-				head: head,
-				next: nil,
+				head:  head,
+				next:  nil,
 			}
 		} else {
 			return nil, errors.New(fmt.Sprintf("failed to parse the expr, %s is illeagal", items[i]))
