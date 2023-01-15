@@ -1,4 +1,4 @@
-module github.com/configurable-flow-actor
+module github.com/hahastrong/configurable-flow-actor
 
 go 1.18
 
