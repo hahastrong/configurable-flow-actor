@@ -1,4 +1,4 @@
-package configurable_flow_actor
+package cfa
 
 type Request struct {
 	Post interface{}            `json:"post"`

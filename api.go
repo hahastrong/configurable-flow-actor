@@ -1,4 +1,4 @@
-package configurable_flow_actor
+package cfa
 
 import (
 	"encoding/json"
